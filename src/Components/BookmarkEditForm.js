@@ -1,8 +1,12 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import axios from "axios"
+const API = process.env.REACT_APP_API_URL;
+
 
 function BookmarkEditForm() {
   let { index } = useParams();
+  let navigate = useNavigate();
 
   const [bookmark, setBookmark] = useState({
     name: "",
@@ -20,10 +24,24 @@ function BookmarkEditForm() {
     setBookmark({ ...bookmark, isFavorite: !bookmark.isFavorite });
   };
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+      axios.get(`${API}/bookmarks/${index}`)
+      .then((res)=>{
+        setBookmark(res.data)
+      }).catch((err)=>{
+        navigate("/not-found")
+      })
+  }, [index,navigate]);
 
+//Handle submit changes /bookmarks/${index} using the bookmark that was set on the get request
   const handleSubmit = (event) => {
     event.preventDefault();
+    axios.put(`${API}/bookmarks/${index}`, bookmark)
+    .then((res)=>{
+      navigate("/bookmarks")
+    }).catch((err)=>{
+      navigate("/not-found")
+    })
   };
   return (
     <div className="Edit">
